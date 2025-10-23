@@ -1,0 +1,88 @@
+version: "3.8"
+
+networks:
+  fabric_test:
+    external: true   # created by your Fabric test network
+
+services:
+  tx-runner-DK:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tx-runner:glibc
+    container_name: tx-runner-DK
+    ports:
+      - "8080:8000"         # runner must listen on 0.0.0.0:8000
+    networks:
+      - fabric_test
+    environment:
+      CC_ID: bank_cc
+      CHANNEL_NAME: mychannel
+      CORE_PEER_ADDRESS: peer0.org1.example.com:7051
+      CORE_PEER_ID: peer0.org1.example.com
+      CORE_PEER_ORG_NAME: org1
+      CORE_PEER_LOCALMSPID: Org1MSP
+      CORE_PEER_MSPCONFIGPATH: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+      CORE_PEER_TLS_CERT_FILE: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_KEY_FILE: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      ORDERER_CA: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+      GATEWAY_CONFIG: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml
+      SGX_CREDENTIALS_PATH: /conf/config/ias
+      # Debugging:
+      FABRIC_SDK_GO_LOGGING_LEVEL: debug
+      GRPC_GO_LOG_SEVERITY_LEVEL: info
+      GRPC_GO_LOG_VERBOSITY_LEVEL: "2"
+    # volumes:
+      # mount org material from host to keep it fresh
+      # - ./organizations:/project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations
+    entrypoint: ["/bin/bash","-lc"]
+    command: ["/run/runner_script-DK.sh"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo | openssl s_client -connect peer0.org1.example.com:7051 -servername peer0.org1.example.com -CAfile $CORE_PEER_TLS_ROOTCERT_FILE -brief 2>/dev/null | grep -q 'Verification: OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  tx-runner-RSA:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tx-runner:glibc
+    container_name: tx-runner-RSA
+    ports:
+      - "8081:8001"         # runner must listen on 0.0.0.0:8001
+    networks:
+      - fabric_test
+    environment:
+      CC_ID: bank_cc
+      CHANNEL_NAME: mychannel
+      CORE_PEER_ADDRESS: peer0.org1.example.com:7051
+      CORE_PEER_ID: peer0.org1.example.com
+      CORE_PEER_ORG_NAME: org1
+      CORE_PEER_LOCALMSPID: Org1MSP
+      CORE_PEER_MSPCONFIGPATH: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+      CORE_PEER_TLS_CERT_FILE: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_KEY_FILE: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      ORDERER_CA: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+      GATEWAY_CONFIG: /project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml
+      SGX_CREDENTIALS_PATH: /conf/config/ias
+      FABRIC_SDK_GO_LOGGING_LEVEL: debug
+      GRPC_GO_LOG_SEVERITY_LEVEL: info
+      GRPC_GO_LOG_VERBOSITY_LEVEL: "2"
+    # volumes:
+      # - ./organizations:/project/src/github.com/hyperledger/fabric-private-chaincode/samples/deployment/test-network/fabric-samples/test-network/organizations
+    entrypoint: ["/bin/bash","-lc"]
+    command: ["/run/runner_script-RSA.sh"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo | openssl s_client -connect peer0.org1.example.com:7051 -servername peer0.org1.example.com -CAfile $CORE_PEER_TLS_ROOTCERT_FILE -brief 2>/dev/null | grep -q 'Verification: OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s

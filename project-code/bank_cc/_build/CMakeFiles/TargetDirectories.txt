@@ -1,0 +1,3 @@
+/project/src/github.com/hyperledger/fabric-private-chaincode/samples/chaincode/bank_cc/_build/CMakeFiles/enclave.dir
+/project/src/github.com/hyperledger/fabric-private-chaincode/samples/chaincode/bank_cc/_build/CMakeFiles/edit_cache.dir
+/project/src/github.com/hyperledger/fabric-private-chaincode/samples/chaincode/bank_cc/_build/CMakeFiles/rebuild_cache.dir

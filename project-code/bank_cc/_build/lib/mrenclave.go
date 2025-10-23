@@ -1,0 +1,10 @@
+/*
+ * Copyright 2019 Intel Corporation
+ * Copyright IBM Corp. All Rights Reserved.
+
+ */
+
+package enclave
+
+// MrEnclave contains hash of enclave code
+const MrEnclave = "214923CF118A81DA9BF8E906375AF039830AC0BD7BB4460AB36E5D046F57CA24"
