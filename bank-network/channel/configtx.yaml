@@ -34,6 +34,8 @@ Organizations:
     AnchorPeers:
       - Host: peer0.bank.example.com
         Port: 7051
+      - Host: peer1.bank.example.com
+        Port: 8051
 
 Capabilities:
   Channel: &ChannelCapabilities

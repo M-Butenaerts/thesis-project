@@ -11,7 +11,7 @@ def set_up(window):
 def set_up_title(window):
     set_up(window)
 
-    title_section = tk.Label(window, text="TITLE", bg=PRIMARY_COLOR, fg=SECONDARY_COLOR, font=(FONT, TITLE_SIZE))
+    title_section = tk.Label(window, text="DK BANK", bg=PRIMARY_COLOR, fg=SECONDARY_COLOR, font=(FONT, TITLE_SIZE))
     title_section.place(x=0, y=0, height=100, relwidth=1)
 
     sub_title_section = tk.Label(window, text="", bg=SECONDARY_COLOR)

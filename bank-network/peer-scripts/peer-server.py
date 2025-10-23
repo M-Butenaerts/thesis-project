@@ -81,6 +81,13 @@ def query(function_call):
 def ping():
     return jsonify({'status': 'peer is running'})
 
+@app.route('/test', methods=['GET'])
+def test():
+    
+    return jsonify({'status': 'peer is running'})
+
+
+
 @app.route('/create-account', methods=['POST'])
 def create_account():
     data = request.json 

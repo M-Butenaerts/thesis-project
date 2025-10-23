@@ -1,3 +1,4 @@
+import re
 import tkinter as tk
 from utils.config import *
 # ALL APPLICATION ITEMS
@@ -13,6 +14,27 @@ def text_input(window, x=None, y=None, relx=None, rely=None, is_password=False):
     
     
     text_input.pack()
+    
+    return text_input
+
+def number_input(window, x=None, y=None, relx=None, rely=None, is_password=False):
+    frame = tk.Frame(window, bg=TERTIARY_COLOR, padx=2, pady=2)
+    frame.place(relx=relx, rely=rely, x=x, y=y)
+    
+    number_input = tk.Entry(frame, bg=QUATERNARY_COLOR, fg=TERTIARY_COLOR, bd=0, width=15, font=(FONT, LABEL_SIZE-5))
+
+    pattern = re.compile(r"^\d*$")
+
+    def validate(proposed: str) -> bool:
+        if proposed == "":
+            return True
+        return bool(pattern.match(proposed))
+
+    vcmd = (window.register(validate), "%P")
+    number_input.config(validate="key", validatecommand=vcmd)
+
+    number_input.pack()
+    return number_input
     
     return text_input
 

@@ -54,12 +54,12 @@ def submit_f(window, account_name, pin_code, repeated_pin_code):
         path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../data"))
         # print(path)
         with open(f"{path}/{account_name}.txt", "w") as f:
-            ss = decaps(sk, data["cypher_text"])[0]
+            ss = decaps(sk, data["ct"])[0]
             # print(ss)
-            f.write(f"{pin_code}\n{ss}") 
+            f.write(f"{pin_code}\n{ss}\n{3}") 
         
         from utils.pages.intro_page import intro_page
-        sleep(15)
+        sleep(5)
         intro_page(window)
     
     elif data["status"] == "account already exists.":

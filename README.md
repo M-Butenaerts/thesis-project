@@ -81,8 +81,8 @@ The chaincode can be repackaged, with:
 
 ```bash
 ./bin/peer lifecycle chaincode package chaincode/tar/bank-chaincode.tar.gz \
-  --path ./chaincode/bank-chaincode \
-  --lang golang \
+  --path .\chaincode\src\github.com\hyperledger\fabric-private-chaincode\samples\chaincode\bank_cc \
+  --lang fpc-cpp \
   --label bank-chaincode_1.0
   ```
 

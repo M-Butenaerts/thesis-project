@@ -14,7 +14,6 @@ def run():
     window.resizable(False, False)
     
     kyber_page(window)
-    # main_page(window, "butti123", "")
     window.mainloop()
 
 run()
