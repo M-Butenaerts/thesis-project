@@ -16,6 +16,7 @@ from kyber.kyber_scripts import key_gen as k_key_gen
 
 store = []
 
+# KEEPS TRACK OF CPU IN THREADS
 def monitor_cpu():
     global store
     try:

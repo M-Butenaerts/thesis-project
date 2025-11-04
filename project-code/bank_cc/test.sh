@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-if [[ -z "${FPC_PATH}" ]]; then
-  echo "Error: FPC_PATH not set"; exit 1
-fi
+export FPC_PATH=/project/src/github.com/hyperledger/fabric-private-chaincode
+export FABRIC_BIN_DIR="$FPC_PATH/fabric-samples/bin"
 
 FABRIC_CFG_PATH="${FPC_PATH}/integration/config"
 FABRIC_SCRIPTDIR="${FPC_PATH}/fabric/bin/"
@@ -10,7 +9,6 @@ FABRIC_SCRIPTDIR="${FPC_PATH}/fabric/bin/"
 . ${FABRIC_SCRIPTDIR}/lib/common_utils.sh
 . ${FABRIC_SCRIPTDIR}/lib/common_ledger.sh
 
-# this is the path points to FPC chaincode binary
 CC_PATH=${FPC_PATH}/samples/chaincode/bank_cc/_build/lib/
 
 CC_ID=bank_cc
@@ -30,7 +28,6 @@ run_test() {
     ${PEER_CMD} lifecycle chaincode checkcommitreadiness -C ${CHAN_ID} --name ${CC_ID} --version ${CC_VER} --sequence ${CC_SEQ} --signature-policy ${CC_EP}
     ${PEER_CMD} lifecycle chaincode commit -o ${ORDERER_ADDR} -C ${CHAN_ID} --name ${CC_ID} --version ${CC_VER} --sequence ${CC_SEQ} --signature-policy ${CC_EP}
 
-    # create an FPC chaincode enclave
     ${PEER_CMD} lifecycle chaincode initEnclave -o ${ORDERER_ADDR} --peerAddresses "localhost:7051" --name ${CC_ID}
 
     say "- create accounts"
@@ -41,7 +38,6 @@ run_test() {
     ${PEER_CMD} chaincode query  -o ${ORDERER_ADDR} -C ${CHAN_ID} -n ${CC_ID} -c '{"Args":["getAccount","thieu"]}'
     ${PEER_CMD} chaincode query  -o ${ORDERER_ADDR} -C ${CHAN_ID} -n ${CC_ID} -c '{"Args":["getAccount","quinten"]}'
 
-    # retrieve current value for "asset1";  should be 100;
     say "- deposit"
     ${PEER_CMD} chaincode invoke -o ${ORDERER_ADDR} -C ${CHAN_ID} -n ${CC_ID} -c '{"Args":["deposit", "thieu", "100"]}' --waitForEvent
 

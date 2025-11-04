@@ -13,7 +13,7 @@ def run():
     window.geometry('750x600')
     window.resizable(False, False)
     
-    kyber_page(window)
+    kyber_page(window) # create kyber functionalities
     window.mainloop()
 
 run()

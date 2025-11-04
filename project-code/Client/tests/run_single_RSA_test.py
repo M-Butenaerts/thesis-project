@@ -5,14 +5,6 @@ from time import sleep
 import requests
 import rsa
 
-# SK 2400
-# PK 1184
-# CT 1088
-
-# SK 2560
-# SIG 2420
-
-
 #  ======== ACC 1 =========
 pubkey, privkey = rsa.newkeys(2560)
 pk = pubkey.save_pkcs1().decode("ascii")

@@ -15,5 +15,5 @@ def kyber_page(window):
         window.destroy() 
         return 
 
-    dilithium_page(window)
+    dilithium_page(window) # Create dilithium functionalities
 

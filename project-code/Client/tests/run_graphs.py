@@ -42,7 +42,7 @@ def load_to_dataframe(path):
                 )
 
     if not rows:
-        raise ValueError("No valid rows parsed from JSON. Check the input format.")
+        raise ValueError("No rows")
     df = pd.DataFrame(rows)
     return df
 
@@ -57,12 +57,9 @@ def savefig(path):
     plt.close()
 
 
-def grouped_bar(ax, categories, series_dict, title, ylabel):
-    """
-    categories: list of category labels on x (e.g., txn_types)
-    series_dict: {series_name -> list of values aligned with categories}
-    """
-    x = np.arange(len(categories))
+def grouped_bar(ax, tx_type, series_dict, title, ylabel):
+    
+    x = np.arange(len(tx_type))
     n_series = len(series_dict)
     width = min(0.8 / max(n_series, 1), 0.25)
 
@@ -70,20 +67,16 @@ def grouped_bar(ax, categories, series_dict, title, ylabel):
         ax.bar(x + (idx - (n_series - 1) / 2) * width, vals, width=width, label=name, color=plot_colors[idx])
 
     ax.set_xticks(x)
-    ax.set_xticklabels(categories, rotation=20, ha="right")
+    ax.set_xticklabels(tx_type, rotation=20, ha="right")
     ax.set_title(title)
     ax.set_ylabel(ylabel)
     ax.legend(frameon=False)
     ax.grid(axis="y", linestyle="--", alpha=0.3)
 
 
-# ----------------------------
-# Plots
-# ----------------------------
+
 def plot_avg_bar(df, metric, out_dir):
-    """Bar — Average metric per Protocol per Transaction Type"""
     metric_label = "Latency (s)" if metric == "latency" else "CPU (%)"
-    # pivot into categories=txn_type, series=protocol
     cats = sorted(df["txn_type"].unique())
     series = {}
     for proto in sorted(df["protocol"].unique()):
@@ -99,7 +92,6 @@ def plot_avg_bar(df, metric, out_dir):
 
 
 def plot_box(df, metric, out_dir):
-    """Box plot — distribution per Protocol, separated by transaction type (one file per txn_type)."""
     metric_label = "Latency (s)" if metric == "latency" else "CPU (%)"
     for t in sorted(df["txn_type"].unique()):
         sub = df[df["txn_type"] == t]
@@ -118,11 +110,9 @@ def plot_box(df, metric, out_dir):
 
 
 def plot_scatter_tradeoff(df, out_dir):
-    """Scatter — Latency vs CPU, color by protocol, marker by txn_type."""
     protos = sorted(df["protocol"].unique())
     txns = sorted(df["txn_type"].unique())
 
-    # cycles
     colors = plt.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2", "C3", "C4", "C5"])
     markers = ["o", "s", "^", "D", "P", "X", "*", "v", "<", ">", "h"]
     colors[0] = plot_colors[0]
@@ -151,10 +141,8 @@ def plot_scatter_tradeoff(df, out_dir):
     ax.set_title("Latency vs CPU — Trade-off (points = individual runs)")
     ax.set_xlabel("Latency (s)")
     ax.set_ylabel("CPU (%)")
-    # Make a compact legend
     handles, labels = ax.get_legend_handles_labels()
-    # Reduce legend clutter by grouping: one legend per protocol and one for markers
-    # Protocol legend
+
     from matplotlib.lines import Line2D
 
     proto_handles = [Line2D([0], [0], marker="o", color=proto_to_color[p], linestyle="", label=p) for p in protos]
@@ -168,7 +156,7 @@ def plot_scatter_tradeoff(df, out_dir):
 
 
 def plot_heatmap(df, metric, out_dir):
-    """Heatmap — Average metric (rows=protocols, cols=txn types)"""
+    
     metric_label = "Latency (s)" if metric == "latency" else "CPU (%)"
     pivot = (
         df.groupby(["protocol", "txn_type"])[metric]
@@ -197,7 +185,6 @@ def plot_heatmap(df, metric, out_dir):
 
 
 def plot_dual_axis_per_txn(df, out_dir):
-    """Dual-axis — For each transaction type, plot average latency (left) and CPU (right) across protocols."""
     for t in sorted(df["txn_type"].unique()):
         sub = df[df["txn_type"] == t]
         if sub.empty:
@@ -220,17 +207,12 @@ def plot_dual_axis_per_txn(df, out_dir):
         ax2.set_ylabel("CPU (%)")
         ax1.grid(axis="y", linestyle="--", alpha=0.3)
 
-        # Build a combined legend
         handles1, labels1 = ax1.get_legend_handles_labels()
         handles2, labels2 = ax2.get_legend_handles_labels()
         ax1.legend(handles1 + handles2, labels1 + labels2, frameon=False, loc="upper right")
 
         savefig(os.path.join(out_dir, f"dual_axis_{t}.png"))
 
-
-# ----------------------------
-# Main
-# ----------------------------
 def main():
     parser = argparse.ArgumentParser(description="Generate performance graphs from experiment JSON.")
     parser.add_argument("input_json", help="Path to input JSON file")
@@ -242,16 +224,15 @@ def main():
     ensure_out(args.out)
     df = load_to_dataframe(args.input_json)
 
-    # Basic summary CSV (optional but handy)
-    summary = (
-        df.groupby(["protocol", "txn_type"])
-        .agg(avg_latency=("latency", "mean"), p95_latency=("latency", lambda s: s.quantile(0.95)),
-             avg_cpu=("cpu", "mean"), p95_cpu=("cpu", lambda s: s.quantile(0.95)),
-             n_runs=("latency", "size"))
-        .reset_index()
-    )
-    summary_path = os.path.join(args.out, "summary.csv")
-    summary.to_csv(summary_path, index=False)
+    # summary = (
+    #     df.groupby(["protocol", "txn_type"])
+    #     .agg(avg_latency=("latency", "mean"), p95_latency=("latency", lambda s: s.quantile(0.95)),
+    #          avg_cpu=("cpu", "mean"), p95_cpu=("cpu", lambda s: s.quantile(0.95)),
+    #          n_runs=("latency", "size"))
+    #     .reset_index()
+    # )
+    # summary_path = os.path.join(args.out, "summary.csv")
+    # summary.to_csv(summary_path, index=False)
 
     # Plots
     plot_avg_bar(df, "latency", args.out)
@@ -268,7 +249,7 @@ def main():
     plot_dual_axis_per_txn(df, args.out)
 
     print(f"Done. Charts written to: {os.path.abspath(args.out)}")
-    print(f"Summary CSV: {os.path.abspath(summary_path)}")
+    # print(f"Summary CSV: {os.path.abspath(summary_path)}")
 
 
 if __name__ == "__main__":

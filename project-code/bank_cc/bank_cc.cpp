@@ -12,6 +12,7 @@
 #define OK "OK"
 #define MAX_BUF 1024
 
+// Parsing functions
 static inline bool parseI64(const std::string& s, int64_t& v) {
     try {
         size_t pos = 0;
@@ -22,6 +23,7 @@ static inline bool parseI64(const std::string& s, int64_t& v) {
     } catch (...) { return false; }
 }
 
+// Overflow functions
 static inline bool willAddOverflow(int64_t a, int64_t b) {
     if (b > 0 && a > std::numeric_limits<int64_t>::max() - b) return true;
     if (b < 0 && a < std::numeric_limits<int64_t>::min() - b) return true;
@@ -123,7 +125,7 @@ static bool increment_seq(JSON_Object* obj) {
     set_seq_i64(obj, seq + 1);
     return true;
 }
-
+// Main Invoke function
 int invoke(uint8_t* response,
     uint32_t max_response_len,
     uint32_t* actual_response_len,

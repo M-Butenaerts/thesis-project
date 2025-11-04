@@ -1,9 +1,17 @@
 clear
 export FPC_PATH=$PWD
-# make -C $FPC_PATH/utils/docker pull
-cd $FPC_PATH/samples/chaincode/bank_cc/
+# export DOCKER_ENCLAVE_SO_PATH=$FPC_PATH/ecc_enclave/_build/lib
+export SGX_MODE=SIM
+
+make docker
+rm -rf ecc/chaincode/enclave/ecc-enclave-include
+rm -rf ecc/chaincode/enclave/ecc-enclave-lib
+
+mkdir ecc_enclave/_build/lib ecc/chaincode/enclave/ecc-enclave-lib
+
 make 
-cd $FPC_PATH 
+
+make -C $FPC_PATH/utils/docker clean
 make -C $FPC_PATH/utils/docker build
 
 export PATH=$PATH:$FPC_PATH/fabric/bin
@@ -29,7 +37,9 @@ export CORE_PEER_TLS_ROOTCERT_FILE=$FPC_PATH/samples/deployment/test-network/fab
 export ORDERER_CA=$FPC_PATH/samples/deployment/test-network/fabric-samples/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 export GATEWAY_CONFIG=$FPC_PATH/samples/deployment/test-network/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml
 
+make -C $FPC_PATH/samples/chaincode/bank_cc clean
 make -C $FPC_PATH/samples/chaincode/bank_cc build docker
+
 export CC_VER=$(cat $FPC_PATH/samples/chaincode/bank_cc/_build/lib/mrenclave)
 echo "CC_VER=$CC_VER"
 # make -C ${FPC_PATH}/ercc all docker
@@ -41,9 +51,12 @@ make -C "$FPC_PATH/ecc" \
 
 echo === NETWORK ===
 cd $FPC_PATH/samples/deployment/test-network
+git config --global --add safe.directory $FPC_PATH/samples/deployment/test-network/fabric-samples
 ./setup.sh
 
 cd $FPC_PATH/samples/deployment/test-network/fabric-samples/test-network
+
+./network.sh down
 ./network.sh up createChannel -c mychannel -ccaasdocker true
 
 cd $FPC_PATH/samples/deployment/test-network
@@ -103,4 +116,3 @@ make
 ./fpcclient query getAccount thieu
 ./fpcclient invoke withdrawal thieu 100 
 ./fpcclient query getAccount thieu
-
